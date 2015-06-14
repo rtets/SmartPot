@@ -1,7 +1,6 @@
-module.exports = function(args) {
+module.exports = function(_config) {
     this._http=require('http');
     this._fs=require('fs');
-    var _config = require('./config.json');
     
     this._hostname = _config.host;
     this._port = _config.port;
@@ -9,6 +8,7 @@ module.exports = function(args) {
     this._moistureEndpoint = _config.moistureEndpoint;
     this._tempEndpoint = _config.tempEndpoint;
     this._uvEndpoint = _config.uvEndpoint;
+    this._pumpEndpoint = _config.pumpEndpoint;
     
     console.log(JSON.stringify(_config));
     
@@ -49,6 +49,35 @@ module.exports = function(args) {
         
         
     };
+    
+    this.doGet = function (endpoint, callback) { 
+        
+        var options = {
+              hostname: this._hostname,
+              port: this._port,
+              path: endpoint
+            };
+                        
+        this._http.get(options, function(res) {
+            
+            if (res.statusCode != 200)
+            {
+                console.log('oops! response: ' + res.statusCode);
+            }
+            else
+            {
+                var body = '';
+                res.on('data', function(chunk) {
+                    body += chunk;
+                });
+                res.on('end', function() {
+                    callback(body);
+                });
+            }
+        });
+        
+        
+    };
         
     this.submitMoisture = function(stat) { 
             this.doSubmit(stat, this._moistureEndpoint);
@@ -60,6 +89,10 @@ module.exports = function(args) {
 
     this.submitUv = function(stat) { 
             this.doSubmit(stat, this._uvEndpoint);
+        };
+    
+    this.getPumpOn = function(callback) { 
+            this.doGet(this._pumpEndpoint, callback);
         };
     
     this.printHi = function()

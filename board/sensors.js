@@ -1,10 +1,10 @@
-module.exports = function(args) {
+module.exports = function(_config) {
     var grove_moisture = require('jsupm_grovemoisture');
-    var myMoistureObj = new grove_moisture.GroveMoisture(0);
+    var myMoistureObj = new grove_moisture.GroveMoisture(_config.analogMoisturePin);
     
     var groveSensor = require('jsupm_grove');
-    var light = new groveSensor.GroveLight(1);
-    var temp = new groveSensor.GroveTemp(2);
+    var light = new groveSensor.GroveLight(_config.analogLightPin);
+    var temp = new groveSensor.GroveTemp(_config.analogTempPin);
 
     this.takeAnalogLightReading = function ()
     {

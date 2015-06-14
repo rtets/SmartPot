@@ -2,13 +2,20 @@ console.log('Initialising...');
 var mraa = require('mraa'); //require mraa
 console.log('MRAA Version: ' + mraa.getVersion()); //write the mraa version to the console
 
+var _config = require('./config.json');
 var client = require('./client.js');
-var sercli = new client();
+var sercli = new client(_config);
 var sensors = require('./sensors.js');
-var senses = new sensors();
+var senses = new sensors(_config);
+var outputs = require('./outputs.js');
+var output = new outputs(_config);
+
+var barLevel = 1;
+var barUp = true;
 
 sercli.printHi();
 senses.printHi();
+output.printHi();
     
 
 function submitReadingData()
@@ -24,6 +31,38 @@ function submitReadingData()
     console.log('submitted temp');
 }
 
+function checkPump()
+{
+    console.log('checkPump...');
+    sercli.getPumpOn(function(turnPumpOn) {
+        console.log('pumpResult:' + turnPumpOn);
+        if(turnPumpOn)
+        {
+            console.log('turning pump on');
+            output.turnRelayOn();
+        }
+        else
+        {
+            console.log('turning pump off');
+            output.turnRelayOff();
+        }
+    });
+}
+
+function switchRelay(on)
+{
+    if(on)
+    {
+        output.turnRelayOn();
+    }
+    else
+    {
+        output.turnRelayOff();
+    }
+    setTimeout(switchRelay, 1000, !on);
+}
+
+
 // Print message when exiting
 process.on('SIGINT', function()
 {
@@ -33,7 +72,16 @@ process.on('SIGINT', function()
 
     
 //this.http=require('http');
-setInterval(submitReadingData, 1000);
+//setInterval(submitReadingData, 1000);
+
+
+output.turnRelayOff();
+setInterval(checkPump, 10000, true);
+
+//setTimeout(switchRelay, 1000, true);
+//setTimeout(checkPump, 1000, true);
+
+//setInterval(moveLED, 1000);
 
 
 /*
