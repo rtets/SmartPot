@@ -1,0 +1,56 @@
+<div class="container">
+
+    <div ng-include="'app/components/navbar/navbar.html'"></div>
+
+    <!--
+  <div class="jumbotron text-center">
+    <h1>'Allo, 'Allo!</h1>
+    <p class="lead">
+      <img src="assets/images/yeoman.png" alt="I'm Yeoman"><br>
+      Always a pleasure scaffolding your apps.
+    </p>
+    <p><a class="btn btn-lg btn-success" ng-href="#">Splendid!</a></p>
+  </div>
+-->
+
+    <div class="row">
+        <div class="col-sm-12 col-md-6">
+            <h2><i class="glyphicon glyphicon-map-marker"> </i>Location: Maker Academy</h2>
+            <h4>Current Temperature: {{data.temp[0][data.temp[0].length-1]}} C</h4>
+            <h4>Current Moisture: {{data.moisture[0][data.moisture[0].length-1]}} % </h4>
+            <h4>Current UV Level:  {{data.uv[0][data.uv[0].length-1]}}</h4>
+
+            <p class="bg-info">"{{msg}}"</p>
+            <button ng-click="pumpOn()" class="btn btn-success btn-lg">Water me</button>
+            <div class="checkbox">
+                <label>
+                    <input type="checkbox"> Toggle Auto Watering
+                </label>
+            </div>
+           
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <h3><i class="glyphicon glyphicon-tint"></i> Moisture</h3>
+            <canvas id="line" class="chart chart-line" options="options.moisture" data="data.moisture" labels="labels" series="series">
+            </canvas>
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <h3><i class="glyphicon glyphicon-adjust"></i> UV</h3>
+            <canvas id="uv-bar" class="chart chart-bar" options="options.uv" data="data.uv" labels="labels" series="series">
+            </canvas>
+        </div>
+        <div class="col-sm-12 col-md-6">
+            <h3><i class="glyphicon glyphicon-dashboard"></i> Temperature</h3>
+            <canvas id="line" class="chart chart-line" options="options.temp" data="data.temp" labels="labels" series="series">
+            </canvas>
+        </div>
+    </div>
+
+    <hr>
+
+    <div class="footer">
+        <p>With ♥ from Yoyu, Richard, Stefan and Giuseppe</a>
+        </p>
+    </div>
+
+</div>

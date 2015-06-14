@@ -17,7 +17,24 @@ dataRecord.prototype.push = function (reading) {
 dataRecord.prototype.list = function (num,callback) {
     this.db.find({}).sort({
         datetime: -1
-    }).limit(10).exec(callback);
+    }).limit(num).exec(function(err,docs){
+        var results=[];
+        //console.log(docs);
+        for(i=0;i<docs.length;i++){
+            results.push(docs[i].stat);
+            if(i==(docs.length-1)){
+                callback(err,results);
+            }
+        }
+       
+    });
 }
 
+dataRecord.prototype.getLatest = function (num,callback) {
+    this.db.find({}).sort({
+        datetime: -1
+    }).limit(1).exec(function(err,docs){
+         callback(err,docs[0].stat);   
+    });
+}
 module.exports=dataRecord;
