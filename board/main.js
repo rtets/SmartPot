@@ -1,15 +1,90 @@
-GLOBAL.deviceId = '6a-ae-18-12-3a-59'
-GLOBAL.analogLightComponentName = "analogLight";
-GLOBAL.moistureComponentName = "moisture";
-
 console.log('Initialising...');
 var mraa = require('mraa'); //require mraa
 console.log('MRAA Version: ' + mraa.getVersion()); //write the mraa version to the console
 
+var _config = require('./config.json');
 var client = require('./client.js');
-var sercli = new client();
+var sercli = new client(_config);
+var sensors = require('./sensors.js');
+var senses = new sensors(_config);
+var outputs = require('./outputs.js');
+var output = new outputs(_config);
+
+var barLevel = 1;
+var barUp = true;
+
 sercli.printHi();
+senses.printHi();
+output.printHi();
     
+
+function submitReadingData()
+{   
+    var readings = senses.takeAllReadings();
+    console.log('submitting readings: ' + JSON.stringify(readings));
+    
+    sercli.submitUv(readings.light);
+    console.log('submitted light');
+    sercli.submitMoisture(readings.moisture);
+    console.log('submitted moisture');
+    sercli.submitTemp(readings.temp);
+    console.log('submitted temp');
+}
+
+function checkPump()
+{
+    console.log('checkPump...');
+    sercli.getPumpOn(function(turnPumpOn) {
+        console.log('pumpResult:' + turnPumpOn);
+        if(turnPumpOn)
+        {
+            console.log('turning pump on');
+            output.turnRelayOn();
+        }
+        else
+        {
+            console.log('turning pump off');
+            output.turnRelayOff();
+        }
+    });
+}
+
+function switchRelay(on)
+{
+    if(on)
+    {
+        output.turnRelayOn();
+    }
+    else
+    {
+        output.turnRelayOff();
+    }
+    setTimeout(switchRelay, 1000, !on);
+}
+
+
+// Print message when exiting
+process.on('SIGINT', function()
+{
+	console.log("Exiting...");
+	process.exit(0);
+});
+
+    
+//this.http=require('http');
+//setInterval(submitReadingData, 1000);
+
+
+output.turnRelayOff();
+setInterval(checkPump, 10000, true);
+
+//setTimeout(switchRelay, 1000, true);
+//setTimeout(checkPump, 1000, true);
+
+//setInterval(moveLED, 1000);
+
+
+/*
 var grove_moisture = require('jsupm_grovemoisture');
 var myMoistureObj = new grove_moisture.GroveMoisture(0);
     
@@ -33,29 +108,4 @@ function takeMoistureReading()
 	return parseInt(myMoistureObj.value());
 }
 
-function submitReadingData()
-{
-    var lightReading = takeAnalogLightReading();
-    var moistureReading = takeMoistureReading();
-    var tempReading = takeTempReading();
-    
-    console.log('submitting moisture: ' + moistureReading + '  temp: ' + tempReading + '  and light: ' + lightReading);
-    
-    sercli.submitUv(lightReading);
-    console.log('submitted light');
-    sercli.submitMoisture(moistureReading);
-    console.log('submitted moisture');
-    sercli.submitTemp(tempReading);
-    console.log('submitted temp');
-}
-
-// Print message when exiting
-process.on('SIGINT', function()
-{
-	console.log("Exiting...");
-	process.exit(0);
-});
-
-    
-//this.http=require('http');
-setInterval(submitReadingData, 1000);
+*/

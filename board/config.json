@@ -1,0 +1,15 @@
+{
+    "host" : "192.168.50.158",
+    "port" : 3000,
+    "http_globalAgent_maxSockets" : 100,
+    "moistureEndpoint" : "/moisture/record",
+    "tempEndpoint" : "/temp/record",
+    "uvEndpoint" : "/uv/record",
+    "pumpEndpoint" : "/pump",
+    "analogLightPin": 0,
+    "analogTempPin": 2,
+    "analogMoisturePin": 1,
+    "digitalLEDBarPin": 6,
+    "digitalLEDBarClockPin": 7,
+    "digitalRelayPin": 5
+}

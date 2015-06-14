@@ -1,18 +1,24 @@
-module.exports = function(args) {
+module.exports = function(_config) {
     this._http=require('http');
-    this._http.globalAgent.maxSockets = 100;
-    this._hostname = '192.168.50.158';
-    this._moistureEndpoint = '/moisture/record';
-    this._tempEndpoint = '/temp/record';
-    this._uvEndpoint = '/uv/record';
+    this._fs=require('fs');
     
-    this.doSubmit = function (input, host, endpoint) { 
+    this._hostname = _config.host;
+    this._port = _config.port;
+    this._http.globalAgent.maxSockets = _config.http_globalAgent_maxSockets;
+    this._moistureEndpoint = _config.moistureEndpoint;
+    this._tempEndpoint = _config.tempEndpoint;
+    this._uvEndpoint = _config.uvEndpoint;
+    this._pumpEndpoint = _config.pumpEndpoint;
+    
+    console.log(JSON.stringify(_config));
+    
+    this.doSubmit = function (input, endpoint) { 
         var stat = {stat: input};    
         var data = JSON.stringify(stat);    
         
         var options = {
-              hostname: host,
-              port: 3000,
+              hostname: this._hostname,
+              port: this._port,
               path: endpoint,
               method: 'POST',
               //body: 'stat:' + stat,
@@ -22,29 +28,76 @@ module.exports = function(args) {
               }
             };
                         
-            var req = this._http.request(options, function(res) {
-                console.log('POST RESULT: ' + options.hostname + options.path + ' - stat=' + stat.stat);
-                res.resume();
-            });
+        var req = this._http.request(options, function(res) {
+            
+            if (res.statusCode != 200)
+            {
+                console.log('oops! response: ' + res.statusCode);
+            }   
         
+            res.resume();
+            
+        });
+        
+        try{
             req.end(data);
+        }
+        catch (e)
+        {
+            req.abort();
+        }
+        
+        
+    };
+    
+    this.doGet = function (endpoint, callback) { 
+        
+        var options = {
+              hostname: this._hostname,
+              port: this._port,
+              path: endpoint
+            };
+                        
+        this._http.get(options, function(res) {
+            
+            if (res.statusCode != 200)
+            {
+                console.log('oops! response: ' + res.statusCode);
+            }
+            else
+            {
+                var body = '';
+                res.on('data', function(chunk) {
+                    body += chunk;
+                });
+                res.on('end', function() {
+                    callback(body);
+                });
+            }
+        });
+        
+        
     };
         
     this.submitMoisture = function(stat) { 
-            this.doSubmit(stat, this._hostname, this._moistureEndpoint);
+            this.doSubmit(stat, this._moistureEndpoint);
         };
         
     this.submitTemp = function(stat) { 
-            this.doSubmit(stat, this._hostname, this._tempEndpoint);
+            this.doSubmit(stat, this._tempEndpoint);
         };
 
     this.submitUv = function(stat) { 
-            this.doSubmit(stat, this._hostname, this._uvEndpoint);
+            this.doSubmit(stat, this._uvEndpoint);
+        };
+    
+    this.getPumpOn = function(callback) { 
+            this.doGet(this._pumpEndpoint, callback);
         };
     
     this.printHi = function()
     {
-        console.log('hi!');
+        console.log('client shibe checking in!');
     };
 };
 
